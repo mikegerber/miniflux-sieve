@@ -30,7 +30,7 @@ In progress:
 
 ```yaml
 # ~/.config/miniflux-sieve/rules.yml
-version 1:
+version: 1
 rules:
   - name: Expire old Ars Technica entries
     feed: "http://feeds.arstechnica.com/arstechnica/index"
