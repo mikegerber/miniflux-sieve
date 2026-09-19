@@ -25,7 +25,7 @@ In progress:
 - Documentation
 - More examples
 - Daemon mode
-- Docker container
+- Container image
 
 
 ## Example config
