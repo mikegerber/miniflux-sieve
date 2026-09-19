@@ -2,7 +2,10 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 	"math"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -24,4 +27,22 @@ func ParseDuration(s string) (time.Duration, error) {
 	}
 
 	return time.Duration(days) * 24 * time.Hour, nil
+}
+
+// Match against multiple regular expressions, true if any matches
+func MatchStringAny(patterns []string, s string) bool {
+	matched := false
+	for _, pattern := range patterns {
+		pattern = "(?i)" + pattern // case-insensitive by default
+		pattern_matched, err := regexp.MatchString(pattern, s)
+		if err != nil {
+			slog.Error("Error in regex", "error", err)
+			os.Exit(1)
+		}
+		if pattern_matched {
+			matched = true
+			break
+		}
+	}
+	return matched
 }

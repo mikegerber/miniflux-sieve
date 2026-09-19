@@ -24,6 +24,7 @@ type Rule struct {
 type Condition struct {
 	OlderThan       string     `yaml:"older_than"`
 	Tagged          StringList `yaml:"tagged"`
+	TitleMatches    StringList `yaml:"title_matches"`
 	NotTitleMatches StringList `yaml:"not_title_matches"`
 	UrlMatches      StringList `yaml:"url_matches"`
 	ContentMatches  StringList `yaml:"content_matches"`
@@ -91,7 +92,26 @@ func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 			return matched
 		}
 
-		return filter_older_than(entry) && filter_tagged(entry)
+		filter_title_matches := func(entry miniflux.Entry) bool {
+			// Always true if not filtered on title match
+			if len(rule.When.TitleMatches) == 0 {
+				return true
+			}
+			return MatchStringAny(rule.When.TitleMatches, entry.Title)
+		}
+
+		filter_not_title_matches := func(entry miniflux.Entry) bool {
+			// Always true if not filtered on "not title match"
+			if len(rule.When.NotTitleMatches) == 0 {
+				return true
+			}
+			return !MatchStringAny(rule.When.NotTitleMatches, entry.Title)
+		}
+
+		return filter_older_than(entry) &&
+			filter_tagged(entry) &&
+			filter_title_matches(entry) &&
+			filter_not_title_matches(entry)
 	}
 	return filter
 }
@@ -110,14 +130,11 @@ func apply_rules(client *miniflux.Client, rules []Rule) {
 		}
 		if rule.When.OlderThan == "" &&
 			len(rule.When.Tagged) == 0 &&
+			len(rule.When.TitleMatches) == 0 &&
 			len(rule.When.NotTitleMatches) == 0 &&
 			len(rule.When.UrlMatches) == 0 &&
 			len(rule.When.ContentMatches) == 0 {
 			slog.Warn("Skipping rule with no valid conditions", "rule", rule)
-			continue
-		}
-		if len(rule.When.NotTitleMatches) > 0 {
-			slog.Warn("Skipping rule: not_title_matches not implemented yet", "rule", rule)
 			continue
 		}
 		if len(rule.When.UrlMatches) > 0 {
