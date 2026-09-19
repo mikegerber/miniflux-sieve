@@ -104,6 +104,10 @@ func apply_rules(client *miniflux.Client, rules []Rule) {
 	}
 
 	for _, rule := range rules {
+		if rule.Feed == "" {
+			slog.Warn("Skipping rule with no feed", "rule", rule)
+			continue
+		}
 		if rule.When.OlderThan == "" &&
 			len(rule.When.Tagged) == 0 &&
 			len(rule.When.NotTitleMatches) == 0 &&
