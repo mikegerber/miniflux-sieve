@@ -21,7 +21,7 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Download binary
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: miniflux-sieve
           run-id: ${{ github.event.workflow_run.id }}
