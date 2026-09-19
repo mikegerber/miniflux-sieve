@@ -108,10 +108,19 @@ func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 			return !MatchStringAny(rule.When.NotTitleMatches, entry.Title)
 		}
 
+		filter_url_matches := func(entry miniflux.Entry) bool {
+			// Always true if not filtered on URL match
+			if len(rule.When.UrlMatches) == 0 {
+				return true
+			}
+			return MatchStringAny(rule.When.UrlMatches, entry.URL)
+		}
+
 		return filter_older_than(entry) &&
 			filter_tagged(entry) &&
 			filter_title_matches(entry) &&
-			filter_not_title_matches(entry)
+			filter_not_title_matches(entry) &&
+			filter_url_matches(entry)
 	}
 	return filter
 }
@@ -135,10 +144,6 @@ func apply_rules(client *miniflux.Client, rules []Rule) {
 			len(rule.When.UrlMatches) == 0 &&
 			len(rule.When.ContentMatches) == 0 {
 			slog.Warn("Skipping rule with no valid conditions", "rule", rule)
-			continue
-		}
-		if len(rule.When.UrlMatches) > 0 {
-			slog.Warn("Skipping rule: url_matches not implemented yet", "rule", rule)
 			continue
 		}
 		if len(rule.When.ContentMatches) > 0 {

@@ -14,13 +14,13 @@ Currently working functionality:
 - Filter based on
     - age (e.g. anything older than 7 days)
     - tags (e.g. "Sponsor")
-    - article title match
-    - article title non-match, as in "but not if title matches"
+    - title match
+    - title non-match, as in "but not if title matches"
+    - article URL (e.g. filter "/sport/" articles)
 - and combinations
 
 In progress:
 - Filter based on
-    - article URL (e.g. filter "/sport/" articles)
     - content (e.g. filter newspaper "plus" articles)
 - Documentation
 - More examples
@@ -51,4 +51,8 @@ rules:
         - ernie
         - bert
         - oscar
+  - name: Not interested in sport news
+    feed: "https://www.tagesspiegel.de/contentexport/feed/home"
+    when:
+      url_matches: "/sport/"
 ```
