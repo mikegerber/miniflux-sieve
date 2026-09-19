@@ -28,6 +28,15 @@ In progress:
 - Docker container
 
 
+## Example config
+
+```yaml
+# ~/.config/miniflux-sieve/config.yml
+MINIFLUX_URL: "https://miniflux.example.com"
+MINIFLUX_API_KEY: "My secret token"  # Settings → API Keys → Create a new API key
+```
+
+
 ## Example rules
 
 ```yaml
