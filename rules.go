@@ -151,7 +151,7 @@ func applyRules(client *miniflux.Client, rules []rule) error {
 
 		for _, feed := range feeds {
 			if rule.Feed == feed.FeedURL {
-				slog.Info("Applying rule to", "feed", rule.Feed)
+				slog.Info("Applying rule", "rule", rule)
 
 				// Go through all unread and non-starred items and, if they meet the conditions,
 				// mark them as read.
