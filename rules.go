@@ -175,11 +175,10 @@ func applyRules(client *miniflux.Client, rules []rule) {
 						idsToMarkRead = append(idsToMarkRead, entry.ID)
 					}
 				}
-				client.UpdateEntries(
-					idsToMarkRead,
-					miniflux.EntryStatusRead,
-				)
 
+				if len(idsToMarkRead) > 0 {
+					client.UpdateEntries(idsToMarkRead, miniflux.EntryStatusRead)
+				}
 			}
 		}
 	}
