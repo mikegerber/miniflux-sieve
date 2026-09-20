@@ -183,6 +183,9 @@ func applyRules(client *miniflux.Client, rules []rule) error {
 						return fmt.Errorf("Mark entries read for feed %q: %w", rule.Feed, err)
 					}
 				}
+
+				// Currently, a rule can only match (up to) one feed.
+				break
 			}
 		}
 	}
