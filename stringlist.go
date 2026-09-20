@@ -13,7 +13,10 @@ func (s *StringList) UnmarshalYAML(node ast.Node) error {
 	switch node.Type() {
 	case ast.StringType:
 		stringNode := node.(*ast.StringNode)
-		value := stringNode.GetValue().(string)
+		value, ok := stringNode.GetValue().(string)
+		if !ok {
+			return fmt.Errorf("Expected string, got %T", stringNode.GetValue())
+		}
 		*s = []string{value}
 		return nil
 	case ast.SequenceType:
