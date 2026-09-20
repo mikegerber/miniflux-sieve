@@ -8,7 +8,11 @@ import (
 )
 
 func main() {
-	config := readConfig()
+	config, err := readConfig()
+	if err != nil {
+		slog.Error("Error reading config", "error", err)
+		os.Exit(1)
+	}
 
 	rules, err := readRules()
 	if err != nil {
