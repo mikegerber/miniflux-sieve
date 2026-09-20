@@ -61,7 +61,7 @@ type entryPredicate func(miniflux.Entry) (bool, error)
 
 // Construct a function that filters according to the Rule.
 func ruleFilter(rule rule) entryPredicate {
-	filter := func(entry miniflux.Entry) (bool, error) {
+	return func(entry miniflux.Entry) (bool, error) {
 		filterOlderThan := func(entry miniflux.Entry) (bool, error) {
 			// Always true if not filtered on tags
 			if rule.When.OlderThan == "" {
@@ -120,7 +120,6 @@ func ruleFilter(rule rule) entryPredicate {
 			[]entryPredicate{filterOlderThan, filterTagged, filterTitleMatches, filterNotTitleMatches, filterURLMatches},
 			entry)
 	}
-	return filter
 }
 
 func applyRules(client *miniflux.Client, rules []rule) error {
