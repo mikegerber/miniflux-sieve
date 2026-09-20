@@ -32,33 +32,29 @@ type condition struct {
 	ContentMatches  StringList `yaml:"content_matches"`
 }
 
-func readRules() []rule {
+func readRules() ([]rule, error) {
 	rulesPath, err := xdg.ConfigFile("miniflux-sieve/rules.yml")
 	if err != nil {
-		slog.Error("Could not find rules.yml", "error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("Could not find rules.yml: %w", err)
 	}
 
 	yml, err := os.ReadFile(rulesPath)
 	if err != nil {
-		slog.Error("Could not read rules file", "error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("Could not read rules file: %w", err)
 	}
 
 	var rulesFile rulesFile
 
 	if err := yaml.Unmarshal(yml, &rulesFile); err != nil {
-		slog.Error("Could not unmarshale rules file from YAML", "error", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("Could not unmarshale rules file from YAML: %w",err)
 	}
 	if rulesFile.Version != "1" {
-		slog.Error("Unsupported rules version", "version", rulesFile.Version)
-		os.Exit(1)
+		return nil, fmt.Errorf("Unsupported rules version: %q", rulesFile.Version)
 	}
 
 	rules := rulesFile.Rules
 
-	return rules
+	return rules, nil
 }
 
 type entryPredicate func(miniflux.Entry) (bool, error)
