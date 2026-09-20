@@ -31,7 +31,6 @@ func ParseDuration(s string) (time.Duration, error) {
 
 // Match against multiple regular expressions, true if any matches
 func MatchStringAny(patterns []string, s string) bool {
-	matched := false
 	for _, pattern := range patterns {
 		pattern = "(?i)" + pattern // case-insensitive by default
 		patternMatched, err := regexp.MatchString(pattern, s)
@@ -40,9 +39,8 @@ func MatchStringAny(patterns []string, s string) bool {
 			os.Exit(1)
 		}
 		if patternMatched {
-			matched = true
-			break
+			return true
 		}
 	}
-	return matched
+	return false
 }
