@@ -22,7 +22,7 @@ func (s *StringList) UnmarshalYAML(node ast.Node) error {
 		for _, node := range seq.Values {
 			stringNode, ok := node.(*ast.StringNode)
 			if !ok {
-				return fmt.Errorf("Expected string: %v",  node)
+				return fmt.Errorf("Expected string: %v", node)
 			}
 			values = append(values, stringNode.Value)
 		}
