@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/adrg/xdg"
-	"github.com/goccy/go-yaml"
 	"log/slog"
-	miniflux "miniflux.app/client"
 	"os"
 	"slices"
 	"time"
+
+	"github.com/adrg/xdg"
+	"github.com/goccy/go-yaml"
+	miniflux "miniflux.app/client"
 )
 
 type RulesFile struct {

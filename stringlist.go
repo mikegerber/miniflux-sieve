@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/goccy/go-yaml/ast"
 	"log/slog"
 	"os"
+
+	"github.com/goccy/go-yaml/ast"
 )
 
 // Read a single string or a list of strings from the YAML

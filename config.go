@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/adrg/xdg"
-	"github.com/goccy/go-yaml"
 	"log/slog"
 	"os"
+
+	"github.com/adrg/xdg"
+	"github.com/goccy/go-yaml"
 )
 
 type Config struct {
