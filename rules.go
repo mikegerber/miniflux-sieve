@@ -69,7 +69,7 @@ func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
 				return true
 			}
 
-			olderThanDuration, err := ParseDuration(rule.When.OlderThan)
+			olderThanDuration, err := parseDuration(rule.When.OlderThan)
 			if err != nil {
 				slog.Error("Invalid duration", "rule", rule)
 				os.Exit(1)
@@ -96,7 +96,7 @@ func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
 			if len(rule.When.TitleMatches) == 0 {
 				return true
 			}
-			return MatchStringAny(rule.When.TitleMatches, entry.Title)
+			return matchStringAny(rule.When.TitleMatches, entry.Title)
 		}
 
 		filterNotTitleMatches := func(entry miniflux.Entry) bool {
@@ -104,7 +104,7 @@ func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
 			if len(rule.When.NotTitleMatches) == 0 {
 				return true
 			}
-			return !MatchStringAny(rule.When.NotTitleMatches, entry.Title)
+			return !matchStringAny(rule.When.NotTitleMatches, entry.Title)
 		}
 
 		filterURLMatches := func(entry miniflux.Entry) bool {
@@ -112,7 +112,7 @@ func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
 			if len(rule.When.URLMatches) == 0 {
 				return true
 			}
-			return MatchStringAny(rule.When.URLMatches, entry.URL)
+			return matchStringAny(rule.When.URLMatches, entry.URL)
 		}
 
 		return filterOlderThan(entry) &&

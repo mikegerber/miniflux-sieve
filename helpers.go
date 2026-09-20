@@ -12,7 +12,7 @@ import (
 )
 
 // VERY basic function to parse e.g. "7d" to a time.Duration
-func ParseDuration(s string) (time.Duration, error) {
+func parseDuration(s string) (time.Duration, error) {
 	s = strings.TrimSpace(s)
 
 	unit := s[len(s)-1:]
@@ -30,7 +30,7 @@ func ParseDuration(s string) (time.Duration, error) {
 }
 
 // Match against multiple regular expressions, true if any matches
-func MatchStringAny(patterns []string, s string) bool {
+func matchStringAny(patterns []string, s string) bool {
 	for _, pattern := range patterns {
 		pattern = "(?i)" + pattern // case-insensitive by default
 		patternMatched, err := regexp.MatchString(pattern, s)
