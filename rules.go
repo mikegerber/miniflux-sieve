@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"slices"
@@ -60,75 +61,76 @@ func readRules() []rule {
 	return rules
 }
 
+type entryPredicate func(miniflux.Entry) (bool, error)
+
 // Construct a function that filters according to the Rule.
-func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
-	filter := func(entry miniflux.Entry) bool {
-		filterOlderThan := func(entry miniflux.Entry) bool {
+func ruleFilter(rule rule) entryPredicate {
+	filter := func(entry miniflux.Entry) (bool, error) {
+		filterOlderThan := func(entry miniflux.Entry) (bool, error) {
 			// Always true if not filtered on tags
 			if rule.When.OlderThan == "" {
-				return true
+				return true, nil
 			}
 
 			olderThanDuration, err := parseDuration(rule.When.OlderThan)
 			if err != nil {
-				slog.Error("Invalid duration", "rule", rule)
-				os.Exit(1)
+				return false, err
 			}
 
-			return entry.Date.Before(time.Now().Add(-olderThanDuration))
+			return entry.Date.Before(time.Now().Add(-olderThanDuration)), nil
 		}
 
-		filterTagged := func(entry miniflux.Entry) bool {
+		filterTagged := func(entry miniflux.Entry) (bool, error) {
 			// Always true if not filtered on tags
 			if len(rule.When.Tagged) == 0 {
-				return true
+				return true, nil
 			}
 			for _, tag := range entry.Tags {
 				if slices.Contains(rule.When.Tagged, tag) {
-					return true
+					return true, nil
 				}
 			}
-			return false
+			return false, nil
 		}
 
-		filterTitleMatches := func(entry miniflux.Entry) bool {
+		filterTitleMatches := func(entry miniflux.Entry) (bool, error) {
 			// Always true if not filtered on title match
 			if len(rule.When.TitleMatches) == 0 {
-				return true
+				return true, nil
 			}
-			return matchStringAny(rule.When.TitleMatches, entry.Title)
+			matched, err := matchStringAny(rule.When.TitleMatches, entry.Title)
+			return matched, err
 		}
 
-		filterNotTitleMatches := func(entry miniflux.Entry) bool {
+		filterNotTitleMatches := func(entry miniflux.Entry) (bool, error) {
 			// Always true if not filtered on "not title match"
 			if len(rule.When.NotTitleMatches) == 0 {
-				return true
+				return true, nil
 			}
-			return !matchStringAny(rule.When.NotTitleMatches, entry.Title)
+			matched, err := matchStringAny(rule.When.NotTitleMatches, entry.Title)
+			return !matched, err
 		}
 
-		filterURLMatches := func(entry miniflux.Entry) bool {
+		filterURLMatches := func(entry miniflux.Entry) (bool, error) {
 			// Always true if not filtered on URL match
 			if len(rule.When.URLMatches) == 0 {
-				return true
+				return true, nil
 			}
-			return matchStringAny(rule.When.URLMatches, entry.URL)
+			matched, err := matchStringAny(rule.When.URLMatches, entry.URL)
+			return matched, err
 		}
 
-		return filterOlderThan(entry) &&
-			filterTagged(entry) &&
-			filterTitleMatches(entry) &&
-			filterNotTitleMatches(entry) &&
-			filterURLMatches(entry)
+		return all(
+			[]entryPredicate{filterOlderThan, filterTagged, filterTitleMatches, filterNotTitleMatches, filterURLMatches},
+			entry)
 	}
 	return filter
 }
 
-func applyRules(client *miniflux.Client, rules []rule) {
+func applyRules(client *miniflux.Client, rules []rule) error {
 	feeds, err := client.Feeds()
 	if err != nil {
-		slog.Error("Could not get feeds from Miniflux", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("Could not get feeds from Miniflux: %w", err)
 	}
 
 	for _, rule := range rules {
@@ -165,21 +167,30 @@ func applyRules(client *miniflux.Client, rules []rule) {
 					Starred: miniflux.FilterNotStarred,
 				})
 				if err != nil {
-					slog.Error("Error getting feed entries", "feed", feed)
+					return fmt.Errorf("Error getting feed entries for feed %q: %w", rule.Feed, err)
 					continue
 				}
 
 				var idsToMarkRead []int64
 				for _, entry := range entries.Entries {
-					if filter(*entry) {
+					markRead, err := filter(*entry)
+					if err != nil {
+						return fmt.Errorf("Error filtering: %w", err)
+					}
+					if markRead {
 						idsToMarkRead = append(idsToMarkRead, entry.ID)
 					}
 				}
 
 				if len(idsToMarkRead) > 0 {
-					client.UpdateEntries(idsToMarkRead, miniflux.EntryStatusRead)
+					err := client.UpdateEntries(idsToMarkRead, miniflux.EntryStatusRead)
+					if err != nil {
+						return fmt.Errorf("Mark entries read for feed %q: %w", rule.Feed, err)
+					}
 				}
 			}
 		}
 	}
+
+	return nil
 }

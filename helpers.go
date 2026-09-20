@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"math"
-	"log/slog"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	miniflux "miniflux.app/client"
 )
 
 // VERY basic function to parse e.g. "7d" to a time.Duration
@@ -17,7 +17,6 @@ func parseDuration(s string) (time.Duration, error) {
 	if len(s) < 2 || s[len(s)-1:] != "d" {
 		return 0, fmt.Errorf("duration not in format <days>d: %q", s)
 	}
-
 
 	amount := s[:len(s)-1]
 	days, err := strconv.ParseInt(amount, 10, 64)
@@ -34,17 +33,26 @@ func parseDuration(s string) (time.Duration, error) {
 }
 
 // Match against multiple regular expressions, true if any matches
-func matchStringAny(patterns []string, s string) bool {
+func matchStringAny(patterns []string, s string) (bool, error) {
 	for _, pattern := range patterns {
 		pattern = "(?i)" + pattern // case-insensitive by default
 		patternMatched, err := regexp.MatchString(pattern, s)
 		if err != nil {
-			slog.Error("Error in regex", "error", err)
-			os.Exit(1)
+			return false, fmt.Errorf("Error in regex %q: %w", pattern, err)
 		}
 		if patternMatched {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
+}
+
+func all(predicates []entryPredicate, entry miniflux.Entry) (bool, error) {
+	for _, p := range predicates {
+		ok, err := p(entry)
+		if err != nil || !ok {
+			return ok, err
+		}
+	}
+	return true, nil
 }
