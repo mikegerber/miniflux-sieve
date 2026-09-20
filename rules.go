@@ -83,14 +83,12 @@ func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
 			if len(rule.When.Tagged) == 0 {
 				return true
 			}
-			matched := false
 			for _, tag := range entry.Tags {
 				if slices.Contains(rule.When.Tagged, tag) {
-					matched = true
-					break
+					return true
 				}
 			}
-			return matched
+			return false
 		}
 
 		filterTitleMatches := func(entry miniflux.Entry) bool {
