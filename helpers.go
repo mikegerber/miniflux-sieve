@@ -1,9 +1,9 @@
 package main
 
 import (
-	"errors"
-	"log/slog"
+	"fmt"
 	"math"
+	"log/slog"
 	"os"
 	"regexp"
 	"strconv"
@@ -14,16 +14,20 @@ import (
 // VERY basic function to parse e.g. "7d" to a time.Duration
 func parseDuration(s string) (time.Duration, error) {
 	s = strings.TrimSpace(s)
-
-	unit := s[len(s)-1:]
-	if unit != "d" {
-		return math.MaxInt64, errors.New("duration not in format <x>d")
+	if len(s) < 2 || s[len(s)-1:] != "d" {
+		return 0, fmt.Errorf("duration not in format <days>d: %q", s)
 	}
+
 
 	amount := s[:len(s)-1]
 	days, err := strconv.ParseInt(amount, 10, 64)
 	if err != nil {
-		return math.MaxInt64, err
+		return 0, fmt.Errorf("parse number of days: %w", err)
+	}
+
+	const maxDays = int64(math.MaxInt64) / int64(24*time.Hour)
+	if days > maxDays {
+		return 0, fmt.Errorf("duration out of range: %q", s)
 	}
 
 	return time.Duration(days) * 24 * time.Hour, nil
