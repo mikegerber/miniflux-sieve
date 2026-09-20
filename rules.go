@@ -163,7 +163,6 @@ func applyRules(client *miniflux.Client, rules []rule) error {
 				})
 				if err != nil {
 					return fmt.Errorf("Error getting feed entries for feed %q: %w", rule.Feed, err)
-					continue
 				}
 
 				var idsToMarkRead []int64

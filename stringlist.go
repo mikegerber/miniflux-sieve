@@ -34,5 +34,4 @@ func (s *StringList) UnmarshalYAML(node ast.Node) error {
 	default:
 		return fmt.Errorf("Expected string or list of strings: %v", node)
 	}
-	return nil
 }
