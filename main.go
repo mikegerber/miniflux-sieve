@@ -17,6 +17,7 @@ func main() {
 	rules, err := readRules()
 	if err != nil {
 		slog.Error("Error reading rules", "error", err)
+		os.Exit(1)
 	}
 
 	client := miniflux.New(config.MinifluxURL, config.MinifluxAPIKey)
