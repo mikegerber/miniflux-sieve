@@ -8,6 +8,14 @@ There a few solutions for this, but I wanted more expressive filters, to do some
 'oscar' or 'tiffy'".
 
 
+## How does this compare to Miniflux' own filtering rules?
+
+Miniflux applies filtering at ingestion, while miniflux-sieve can do *rolling expiry*, e.g. keep
+articles unread, but mark them read after 14 days. miniflux-sieve also adds flexibility, say to
+expire unread articles after a time, but keep some in unread state if title matches certain
+keywords. There is some overlapping functionality.
+
+
 ## Progress
 
 Currently working functionality:
