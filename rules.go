@@ -46,7 +46,7 @@ func ReadRules() []Rule {
 
 	var rulesFile RulesFile
 
-	if err := yaml.Unmarshal([]byte(yml), &rulesFile); err != nil {
+	if err := yaml.Unmarshal(yml, &rulesFile); err != nil {
 		slog.Error("Could not unmarshale rules file from YAML", "error", err)
 		os.Exit(1)
 	}
