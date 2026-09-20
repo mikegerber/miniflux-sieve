@@ -11,18 +11,18 @@ import (
 	miniflux "miniflux.app/client"
 )
 
-type RulesFile struct {
+type rulesFile struct {
 	Version string `yaml:"version"`
-	Rules   []Rule `yaml:"rules"`
+	Rules   []rule `yaml:"rules"`
 }
 
-type Rule struct {
+type rule struct {
 	Name string    `yaml:"name"`
 	Feed string    `yaml:"feed"`
-	When Condition `yaml:"when"`
+	When condition `yaml:"when"`
 }
 
-type Condition struct {
+type condition struct {
 	OlderThan       string     `yaml:"older_than"`
 	Tagged          StringList `yaml:"tagged"`
 	TitleMatches    StringList `yaml:"title_matches"`
@@ -31,7 +31,7 @@ type Condition struct {
 	ContentMatches  StringList `yaml:"content_matches"`
 }
 
-func ReadRules() []Rule {
+func readRules() []rule {
 	rulesPath, err := xdg.ConfigFile("miniflux-sieve/rules.yml")
 	if err != nil {
 		slog.Error("Could not find rules.yml", "error", err)
@@ -44,7 +44,7 @@ func ReadRules() []Rule {
 		os.Exit(1)
 	}
 
-	var rulesFile RulesFile
+	var rulesFile rulesFile
 
 	if err := yaml.Unmarshal(yml, &rulesFile); err != nil {
 		slog.Error("Could not unmarshale rules file from YAML", "error", err)
@@ -61,7 +61,7 @@ func ReadRules() []Rule {
 }
 
 // Construct a function that filters according to the Rule.
-func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
+func ruleFilter(rule rule) func(entry miniflux.Entry) bool {
 	filter := func(entry miniflux.Entry) bool {
 		filterOlderThan := func(entry miniflux.Entry) bool {
 			// Always true if not filtered on tags
@@ -126,7 +126,7 @@ func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 	return filter
 }
 
-func ApplyRules(client *miniflux.Client, rules []Rule) {
+func applyRules(client *miniflux.Client, rules []rule) {
 	feeds, err := client.Feeds()
 	if err != nil {
 		slog.Error("Could not get feeds from Miniflux", "error", err)
@@ -152,7 +152,7 @@ func ApplyRules(client *miniflux.Client, rules []Rule) {
 			continue
 		}
 
-		filter := RuleFilter(rule)
+		filter := ruleFilter(rule)
 
 		for _, feed := range feeds {
 			if rule.Feed == feed.FeedURL {

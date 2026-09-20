@@ -8,12 +8,12 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-type Config struct {
+type config struct {
 	MinifluxURL    string `yaml:"MINIFLUX_URL"`
 	MinifluxAPIKey string `yaml:"MINIFLUX_API_KEY"`
 }
 
-func ReadConfig() Config {
+func readConfig() config {
 	configPath, err := xdg.ConfigFile("miniflux-sieve/config.yml")
 	if err != nil {
 		slog.Error("Could not find config.yml", "error", err)
@@ -26,12 +26,12 @@ func ReadConfig() Config {
 		os.Exit(1)
 	}
 
-	var config Config
+	var cfg config
 
-	if err := yaml.Unmarshal([]byte(yml), &config); err != nil {
+	if err := yaml.Unmarshal([]byte(yml), &cfg); err != nil {
 		slog.Error("Could not unmarshal config file from YAML", "error", err)
 		os.Exit(1)
 	}
 
-	return config
+	return cfg
 }

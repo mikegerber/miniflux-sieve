@@ -5,9 +5,9 @@ import (
 )
 
 func main() {
-	config := ReadConfig()
-	rules := ReadRules()
+	config := readConfig()
+	rules := readRules()
 
 	client := miniflux.New(config.MinifluxURL, config.MinifluxAPIKey)
-	ApplyRules(client, rules)
+	applyRules(client, rules)
 }
