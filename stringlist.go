@@ -1,8 +1,7 @@
 package main
 
 import (
-	"log/slog"
-	"os"
+	"fmt"
 
 	"github.com/goccy/go-yaml/ast"
 )
@@ -23,16 +22,14 @@ func (s *StringList) UnmarshalYAML(node ast.Node) error {
 		for _, node := range seq.Values {
 			stringNode, ok := node.(*ast.StringNode)
 			if !ok {
-				slog.Error("Expected string", "node", node)
-				os.Exit(1)
+				return fmt.Errorf("Expected string: %v",  node)
 			}
 			values = append(values, stringNode.Value)
 		}
 		*s = values
 		return nil
 	default:
-		slog.Error("Expected string or list of strings", "node", node)
-		os.Exit(1)
+		return fmt.Errorf("Expected string or list of strings: %v", node)
 	}
 	return nil
 }
