@@ -1,3 +1,4 @@
+// Package main implements the miniflux-sieve command.
 package main
 
 import (
