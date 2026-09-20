@@ -26,35 +26,35 @@ type Condition struct {
 	Tagged          StringList `yaml:"tagged"`
 	TitleMatches    StringList `yaml:"title_matches"`
 	NotTitleMatches StringList `yaml:"not_title_matches"`
-	UrlMatches      StringList `yaml:"url_matches"`
+	URLMatches      StringList `yaml:"url_matches"`
 	ContentMatches  StringList `yaml:"content_matches"`
 }
 
-func read_rules() []Rule {
-	rules_path, err := xdg.ConfigFile("miniflux-sieve/rules.yml")
+func ReadRules() []Rule {
+	rulesPath, err := xdg.ConfigFile("miniflux-sieve/rules.yml")
 	if err != nil {
 		slog.Error("Could not find rules.yml", "error", err)
 		os.Exit(1)
 	}
 
-	yml, err := os.ReadFile(rules_path)
+	yml, err := os.ReadFile(rulesPath)
 	if err != nil {
 		slog.Error("Could not read rules file", "error", err)
 		os.Exit(1)
 	}
 
-	var rulesfile RulesFile
+	var rulesFile RulesFile
 
-	if err := yaml.Unmarshal([]byte(yml), &rulesfile); err != nil {
+	if err := yaml.Unmarshal([]byte(yml), &rulesFile); err != nil {
 		slog.Error("Could not unmarshale rules file from YAML", "error", err)
 		os.Exit(1)
 	}
-	if rulesfile.Version != "1" {
-		slog.Error("Unsupported rules version", "version", rulesfile.Version)
+	if rulesFile.Version != "1" {
+		slog.Error("Unsupported rules version", "version", rulesFile.Version)
 		os.Exit(1)
 	}
 
-	rules := rulesfile.Rules
+	rules := rulesFile.Rules
 
 	return rules
 }
@@ -62,22 +62,22 @@ func read_rules() []Rule {
 // Construct a function that filters according to the Rule.
 func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 	filter := func(entry miniflux.Entry) bool {
-		filter_older_than := func(entry miniflux.Entry) bool {
+		filterOlderThan := func(entry miniflux.Entry) bool {
 			// Always true if not filtered on tags
 			if rule.When.OlderThan == "" {
 				return true
 			}
 
-			olderthan, err := ParseDuration(rule.When.OlderThan)
+			olderThanDuration, err := ParseDuration(rule.When.OlderThan)
 			if err != nil {
 				slog.Error("Invalid duration", "rule", rule)
 				os.Exit(1)
 			}
 
-			return entry.Date.Before(time.Now().Add(-olderthan))
+			return entry.Date.Before(time.Now().Add(-olderThanDuration))
 		}
 
-		filter_tagged := func(entry miniflux.Entry) bool {
+		filterTagged := func(entry miniflux.Entry) bool {
 			// Always true if not filtered on tags
 			if len(rule.When.Tagged) == 0 {
 				return true
@@ -92,7 +92,7 @@ func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 			return matched
 		}
 
-		filter_title_matches := func(entry miniflux.Entry) bool {
+		filterTitleMatches := func(entry miniflux.Entry) bool {
 			// Always true if not filtered on title match
 			if len(rule.When.TitleMatches) == 0 {
 				return true
@@ -100,7 +100,7 @@ func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 			return MatchStringAny(rule.When.TitleMatches, entry.Title)
 		}
 
-		filter_not_title_matches := func(entry miniflux.Entry) bool {
+		filterNotTitleMatches := func(entry miniflux.Entry) bool {
 			// Always true if not filtered on "not title match"
 			if len(rule.When.NotTitleMatches) == 0 {
 				return true
@@ -108,24 +108,24 @@ func RuleFilter(rule Rule) func(entry miniflux.Entry) bool {
 			return !MatchStringAny(rule.When.NotTitleMatches, entry.Title)
 		}
 
-		filter_url_matches := func(entry miniflux.Entry) bool {
+		filterURLMatches := func(entry miniflux.Entry) bool {
 			// Always true if not filtered on URL match
-			if len(rule.When.UrlMatches) == 0 {
+			if len(rule.When.URLMatches) == 0 {
 				return true
 			}
-			return MatchStringAny(rule.When.UrlMatches, entry.URL)
+			return MatchStringAny(rule.When.URLMatches, entry.URL)
 		}
 
-		return filter_older_than(entry) &&
-			filter_tagged(entry) &&
-			filter_title_matches(entry) &&
-			filter_not_title_matches(entry) &&
-			filter_url_matches(entry)
+		return filterOlderThan(entry) &&
+			filterTagged(entry) &&
+			filterTitleMatches(entry) &&
+			filterNotTitleMatches(entry) &&
+			filterURLMatches(entry)
 	}
 	return filter
 }
 
-func apply_rules(client *miniflux.Client, rules []Rule) {
+func ApplyRules(client *miniflux.Client, rules []Rule) {
 	feeds, err := client.Feeds()
 	if err != nil {
 		slog.Error("Could not get feeds from Miniflux", "error", err)
@@ -141,7 +141,7 @@ func apply_rules(client *miniflux.Client, rules []Rule) {
 			len(rule.When.Tagged) == 0 &&
 			len(rule.When.TitleMatches) == 0 &&
 			len(rule.When.NotTitleMatches) == 0 &&
-			len(rule.When.UrlMatches) == 0 &&
+			len(rule.When.URLMatches) == 0 &&
 			len(rule.When.ContentMatches) == 0 {
 			slog.Warn("Skipping rule with no valid conditions", "rule", rule)
 			continue
@@ -170,14 +170,14 @@ func apply_rules(client *miniflux.Client, rules []Rule) {
 					continue
 				}
 
-				var ids_to_mark_read []int64
+				var idsToMarkRead []int64
 				for _, entry := range entries.Entries {
 					if filter(*entry) {
-						ids_to_mark_read = append(ids_to_mark_read, entry.ID)
+						idsToMarkRead = append(idsToMarkRead, entry.ID)
 					}
 				}
 				client.UpdateEntries(
-					ids_to_mark_read,
+					idsToMarkRead,
 					miniflux.EntryStatusRead,
 				)
 

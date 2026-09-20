@@ -34,12 +34,12 @@ func MatchStringAny(patterns []string, s string) bool {
 	matched := false
 	for _, pattern := range patterns {
 		pattern = "(?i)" + pattern // case-insensitive by default
-		pattern_matched, err := regexp.MatchString(pattern, s)
+		patternMatched, err := regexp.MatchString(pattern, s)
 		if err != nil {
 			slog.Error("Error in regex", "error", err)
 			os.Exit(1)
 		}
-		if pattern_matched {
+		if patternMatched {
 			matched = true
 			break
 		}

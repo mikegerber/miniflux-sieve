@@ -8,18 +8,18 @@ import (
 )
 
 type Config struct {
-	MinifluxUrl    string `yaml:"MINIFLUX_URL"`
-	MinifluxApiKey string `yaml:"MINIFLUX_API_KEY"`
+	MinifluxURL    string `yaml:"MINIFLUX_URL"`
+	MinifluxAPIKey string `yaml:"MINIFLUX_API_KEY"`
 }
 
-func read_config() Config {
-	config_path, err := xdg.ConfigFile("miniflux-sieve/config.yml")
+func ReadConfig() Config {
+	configPath, err := xdg.ConfigFile("miniflux-sieve/config.yml")
 	if err != nil {
 		slog.Error("Could not find config.yml", "error", err)
 		os.Exit(1)
 	}
 
-	yml, err := os.ReadFile(config_path)
+	yml, err := os.ReadFile(configPath)
 	if err != nil {
 		slog.Error("Could not read config file", "error", err)
 		os.Exit(1)
