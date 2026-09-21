@@ -45,7 +45,7 @@ jobs:
             ghcr.io/mikegerber/miniflux-sieve
           tags: |
             type=ref,event=branch
-            type=semver
+            type=semver,pattern={{version}}
 
       -
         name: Build and push
