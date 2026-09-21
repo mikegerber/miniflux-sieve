@@ -27,6 +27,9 @@ jobs:
           name: miniflux-sieve
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Set executable bit
+        run: chmod +x miniflux-sieve
 
       -
         name: Login to GHCR
