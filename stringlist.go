@@ -6,9 +6,10 @@ import (
 	"github.com/goccy/go-yaml/ast"
 )
 
-// Read a single string or a list of strings from the YAML
+// StringList is a helper type to uniformly read a list of strings or a single string from the YAML.
 type StringList []string
 
+// UnmarshalYAML implements uniformly unmarshalling a list of string or a single string from the YAML.
 func (s *StringList) UnmarshalYAML(node ast.Node) error {
 	switch node.Type() {
 	case ast.StringType:
