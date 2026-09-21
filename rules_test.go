@@ -38,8 +38,6 @@ func TestRuleFilterTagged(t *testing.T) {
 	if !matched {
 		t.Error("ruleFilter() = false, want true")
 	}
-
-	entry = miniflux.Entry{Title: "News from Sesame Street", Tags: []string{"tiffy", "finchen"}}
 }
 
 func TestRuleFilterTaggedReject(t *testing.T) {
@@ -57,7 +55,6 @@ func TestRuleFilterTaggedReject(t *testing.T) {
 	if matched {
 		t.Error("ruleFilter() = true, want false")
 	}
-
 }
 
 func TestRuleWithNoConditionsIsTrue(t *testing.T) {
