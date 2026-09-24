@@ -9,7 +9,7 @@ import (
 // StringList is a helper type to uniformly read a list of strings or a single string from the YAML.
 type StringList []string
 
-// UnmarshalYAML implements uniformly unmarshalling a list of string or a single string from the YAML.
+// UnmarshalYAML implements uniformly unmarshalling a list of strings or a single string from the YAML.
 func (s *StringList) UnmarshalYAML(node ast.Node) error {
 	switch node.Type() {
 	case ast.StringType:
