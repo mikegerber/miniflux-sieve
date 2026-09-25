@@ -47,5 +47,4 @@ func main() {
 			time.Sleep(config.MinifluxSieveInterval)
 		}
 	}
-
 }
