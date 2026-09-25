@@ -7,3 +7,5 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	miniflux.app v1.0.46
 )
+
+require golang.org/x/sys v0.26.0 // indirect
