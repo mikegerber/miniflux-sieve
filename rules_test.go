@@ -57,6 +57,23 @@ func TestRuleFilterTaggedReject(t *testing.T) {
 	}
 }
 
+func TestRuleFilterTaggedCaseInsensitive(t *testing.T) {
+	rule := rule{
+		When: condition{
+			Tagged: StringList{"grover", "cookie monster"},
+		},
+	}
+	entry := miniflux.Entry{Title: "News from Sesame Street", Tags: []string{"Grover"}}
+
+	matched, err := ruleFilter(rule)(entry)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned unexpected error: %v", err)
+	}
+	if !matched {
+		t.Errorf("ruleFilter() = %v, want true for case-insensitive tag match", matched)
+	}
+}
+
 func TestRuleWithNoConditionsIsTrue(t *testing.T) {
 	rule := rule{}
 	entry := miniflux.Entry{Title: "Tiffy meets Oscar"}

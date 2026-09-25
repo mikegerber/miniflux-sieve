@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/adrg/xdg"
@@ -53,8 +54,18 @@ func readRules() ([]rule, error) {
 	}
 
 	rules := rulesFile.Rules
+	prepareRules(rules)
 
 	return rules, nil
+}
+
+func prepareRules(rules []rule) {
+	for i := range rules {
+		// Make "tagged" lower case to make matching easier
+		for j := range rules[i].When.Tagged {
+			rules[i].When.Tagged[j] = strings.ToLower(rules[i].When.Tagged[j])
+		}
+	}
 }
 
 type entryPredicate func(miniflux.Entry) (bool, error)
@@ -82,7 +93,7 @@ func ruleFilter(rule rule) entryPredicate {
 				return true, nil
 			}
 			for _, tag := range entry.Tags {
-				if slices.Contains(rule.When.Tagged, tag) {
+				if slices.Contains(rule.When.Tagged, strings.ToLower(tag)) {
 					return true, nil
 				}
 			}
