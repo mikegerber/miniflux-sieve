@@ -30,7 +30,7 @@ func readConfig() (config, error) {
 	// Default values
 	cfg := config{
 		MinifluxSieveDaemon:   false,
-		MinifluxSieveInterval: time.Duration(5 * time.Minute),
+		MinifluxSieveInterval: time.Duration(20 * time.Minute),
 	}
 
 	err = yaml.Unmarshal([]byte(yml), &cfg)
