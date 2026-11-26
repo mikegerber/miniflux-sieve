@@ -33,7 +33,7 @@ func readConfig() (config, error) {
 		MinifluxSieveInterval: time.Duration(20 * time.Minute),
 	}
 
-	err = yaml.Unmarshal([]byte(yml), &cfg)
+	err = yaml.UnmarshalWithOptions(yml, &cfg, yaml.DisallowUnknownField())
 	if err != nil {
 		return config{}, fmt.Errorf("Could not unmarshal config file from YAML: %w", err)
 	}
