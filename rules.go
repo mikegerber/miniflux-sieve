@@ -46,7 +46,7 @@ func readRules() ([]rule, error) {
 
 	var rulesFile rulesFile
 
-	if err := yaml.Unmarshal(yml, &rulesFile); err != nil {
+	if err := yaml.UnmarshalWithOptions(yml, &rulesFile, yaml.DisallowUnknownField()); err != nil {
 		return nil, fmt.Errorf("Could not unmarshal rules file from YAML: %w", err)
 	}
 	if rulesFile.Version != "1" {
