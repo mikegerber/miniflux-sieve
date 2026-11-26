@@ -11,7 +11,7 @@ import (
 	miniflux "miniflux.app/client"
 )
 
-// VERY basic function to parse e.g. "7d" to a time.Duration
+// parseDuration parses durations of whole days, for example "7d", to a time.Duration
 func parseDuration(s string) (time.Duration, error) {
 	s = strings.TrimSpace(s)
 	if len(s) < 2 || s[len(s)-1:] != "d" {
@@ -32,7 +32,10 @@ func parseDuration(s string) (time.Duration, error) {
 	return time.Duration(days) * 24 * time.Hour, nil
 }
 
-// Match against multiple regular expressions, true if any matches
+// matchStringAny matches strings against multiple regular expressions, true if any matches
+//
+// Patterns are case-insensitive by default, matching stops at the first match, and an invalid pattern returns
+// an error.
 func matchStringAny(patterns []string, s string) (bool, error) {
 	for _, pattern := range patterns {
 		pattern = "(?i)" + pattern // case-insensitive by default
@@ -47,6 +50,7 @@ func matchStringAny(patterns []string, s string) (bool, error) {
 	return false, nil
 }
 
+// all returns the first false or error result, or true and nil if all predicates pass.
 func all(predicates []entryPredicate, entry miniflux.Entry) (bool, error) {
 	for _, p := range predicates {
 		ok, err := p(entry)
