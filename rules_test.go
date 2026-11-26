@@ -86,3 +86,91 @@ func TestRuleWithNoConditionsIsTrue(t *testing.T) {
 		t.Error("ruleFilter() = false, want true")
 	}
 }
+
+func TestRuleFilterRequiresAllConditions(t *testing.T) {
+	rule := rule{
+		When: condition{
+			Tagged:       StringList{"bert"},
+			TitleMatches: StringList{`Sesame Street`},
+		},
+	}
+	entry := miniflux.Entry{Title: "News from Sesame Street", Tags: []string{"oscar"}}
+
+	matched, err := ruleFilter(rule)(entry)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if matched {
+		t.Fatal("ruleFilter() = true, want false when only the title condition matches")
+	}
+}
+
+func TestRuleFilterInvalidTitlePattern(t *testing.T) {
+	rule := rule{
+		When: condition{
+			TitleMatches: StringList{`[`},
+		},
+	}
+	entry := miniflux.Entry{Title: "News from Sesame Street"}
+
+	matched, err := ruleFilter(rule)(entry)
+	if err == nil {
+		t.Fatal("ruleFilter() returned no error for an invalid regular expression")
+	}
+	if matched {
+		t.Fatal("ruleFilter() = true, want false for an invalid regular expression")
+	}
+}
+
+func TestRuleFilterNotTitleMatchesReject(t *testing.T) {
+	rule := rule{
+		When: condition{
+			NotTitleMatches: StringList{`Sesame Street`},
+		},
+	}
+	entry := miniflux.Entry{Title: "News from Sesame Street"}
+
+	matched, err := ruleFilter(rule)(entry)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if matched {
+		t.Fatal("ruleFilter() = true, want false for an excluded title")
+	}
+}
+
+func TestRuleFilterURLMatches(t *testing.T) {
+	rule := rule{
+		When: condition{
+			URLMatches: StringList{`^https://example\.com/news/`},
+		},
+	}
+	entry := miniflux.Entry{
+		Title: "News from Sesame Street",
+		URL:   "https://example.com/news/sesame-street",
+	}
+
+	matched, err := ruleFilter(rule)(entry)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if !matched {
+		t.Fatal("ruleFilter() = false, want true for a matching URL")
+	}
+}
+
+func TestRuleFilterOlderThan(t *testing.T) {
+	t.Skip("TODO: test entries older and newer than the threshold, and an invalid duration")
+}
+
+func TestRuleFilterNotTitleMatchesAccept(t *testing.T) {
+	t.Skip("TODO: test that a title which does not match the excluded pattern passes")
+}
+
+func TestRuleFilterAllConditionsMatch(t *testing.T) {
+	t.Skip("TODO: test that an entry passes when all configured conditions match")
+}
+
+func TestApplyRulesSkipsRuleWithNoConditions(t *testing.T) {
+	t.Skip("TODO: test that applying a rule with no valid conditions skips it")
+}
