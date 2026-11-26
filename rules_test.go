@@ -163,12 +163,45 @@ func TestRuleFilterOlderThan(t *testing.T) {
 	t.Skip("TODO: test entries older and newer than the threshold, and an invalid duration")
 }
 
+// test that a title which does not match the excluded pattern passes
 func TestRuleFilterNotTitleMatchesAccept(t *testing.T) {
-	t.Skip("TODO: test that a title which does not match the excluded pattern passes")
+	rule := rule{
+		When: condition{
+			NotTitleMatches: StringList{`sesame street|muppets`},
+		},
+	}
+	entry := miniflux.Entry{
+		Title: "The Cookie Monster is at large again!",
+	}
+	matched, err := ruleFilter(rule)(entry)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if !matched {
+		t.Fatal("ruleFilter() = false, want true for a non-matching title")
+	}
 }
 
+// Test that an entry passes when all configured conditions match
 func TestRuleFilterAllConditionsMatch(t *testing.T) {
-	t.Skip("TODO: test that an entry passes when all configured conditions match")
+	rule := rule{
+		When: condition{
+			Tagged:       StringList{`bert`, `ernie`},
+			TitleMatches: StringList{`breakfast`, `lunch`, `dinner`},
+		},
+	}
+	entry := miniflux.Entry{
+		Tags:  []string{"ernie", "cookie monster"},
+		Title: "Ernie meets Cookie Monster for exclusive cookie lunch",
+	}
+
+	matched, err := ruleFilter(rule)(entry)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if !matched {
+		t.Fatal("ruleFilter() = false, want true for entry that matches all conditions")
+	}
 }
 
 func TestApplyRulesSkipsRuleWithNoConditions(t *testing.T) {
