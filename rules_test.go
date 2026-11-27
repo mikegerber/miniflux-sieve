@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	miniflux "miniflux.app/client"
 )
@@ -161,7 +162,48 @@ func TestRuleFilterURLMatches(t *testing.T) {
 }
 
 func TestRuleFilterOlderThan(t *testing.T) {
-	t.Skip("TODO: test entries older and newer than the threshold, and an invalid duration")
+	rule := rule{
+		When: condition{
+			OlderThan: "7d",
+		},
+	}
+
+	entryOld := miniflux.Entry{
+		Title: "not important",
+		Date:  time.Now().Add(-13 * 24 * time.Hour),
+	}
+	matched, err := ruleFilter(rule)(entryOld)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if !matched {
+		t.Fatalf("ruleFilter() = false, want true for an older entry")
+	}
+
+	entryNew := miniflux.Entry{
+		Title: "not important",
+		Date:  time.Now().Add(-1 * 24 * time.Hour),
+	}
+	matched, err = ruleFilter(rule)(entryNew)
+	if err != nil {
+		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
+	}
+	if matched {
+		t.Fatalf("ruleFilter() = true, want false for a newer entry")
+	}
+
+}
+
+func TestRuleFilterOlderThanInvalidDuration(t *testing.T) {
+	invalidRule := rule{
+		When: condition{
+			OlderThan: "half a fortnight",
+		},
+	}
+	_, err := ruleFilter(invalidRule)(miniflux.Entry{})
+	if err == nil {
+		t.Fatal("ruleFilter() did not return an error for an invalid duration")
+	}
 }
 
 // test that a title which does not match the excluded pattern passes
