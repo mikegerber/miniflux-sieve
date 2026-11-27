@@ -19,10 +19,11 @@ func TestRuleFilterTitleMatches(t *testing.T) {
 		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
 	}
 	if !matched {
-		t.Error("ruleFilter() = false, want true")
+		t.Fatal("ruleFilter() = false, want true")
 	}
 }
 
+// TODO: Combine this with TestRuleFilterTaggedCaseInsensitive.
 func TestRuleFilterTagged(t *testing.T) {
 	rule := rule{
 		When: condition{
@@ -36,7 +37,7 @@ func TestRuleFilterTagged(t *testing.T) {
 		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
 	}
 	if !matched {
-		t.Error("ruleFilter() = false, want true")
+		t.Fatal("ruleFilter() = false, want true")
 	}
 }
 
@@ -53,7 +54,7 @@ func TestRuleFilterTaggedReject(t *testing.T) {
 		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
 	}
 	if matched {
-		t.Error("ruleFilter() = true, want false")
+		t.Fatal("ruleFilter() = true, want false")
 	}
 }
 
@@ -70,7 +71,7 @@ func TestRuleFilterTaggedCaseInsensitive(t *testing.T) {
 		t.Fatalf("ruleFilter() returned unexpected error: %v", err)
 	}
 	if !matched {
-		t.Errorf("ruleFilter() = %v, want true for case-insensitive tag match", matched)
+		t.Fatalf("ruleFilter() = %v, want true for case-insensitive tag match", matched)
 	}
 }
 
@@ -83,7 +84,7 @@ func TestRuleWithNoConditionsIsTrue(t *testing.T) {
 		t.Fatalf("ruleFilter() returned an unexpected error: %v", err)
 	}
 	if !matched {
-		t.Error("ruleFilter() = false, want true")
+		t.Fatal("ruleFilter() = false, want true")
 	}
 }
 
@@ -115,7 +116,7 @@ func TestRuleFilterInvalidTitlePattern(t *testing.T) {
 
 	matched, err := ruleFilter(rule)(entry)
 	if err == nil {
-		t.Fatal("ruleFilter() returned no error for an invalid regular expression")
+		t.Error("ruleFilter() returned no error for an invalid regular expression")
 	}
 	if matched {
 		t.Fatal("ruleFilter() = true, want false for an invalid regular expression")
